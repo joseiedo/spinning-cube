@@ -35,7 +35,7 @@ float closeness;
 int screenWidth = 80, screenHeight = 22;
 float cubeWidth = 20;
 float horizontalOffSet;
-// Buffer to deal with the depth, to know if something if in front or behind
+// Buffer to deal with the depth, to know if something is in front or behind
 float zBuffer[80 * 22];
 // Buffer to store the current frame
 char output[80 * 22];
@@ -80,8 +80,9 @@ void computeAndDrawPixel(float x, float y, float z, char ch) {
 
   // Adding the pixel to the buffer
   // Needed to multiplicate by the width because
-  // i'm using a 1-D array in the buffer
+  // i'm using a 1-D array (len = width * height) in the buffer
   pointIndex = pointX2D + pointY2D * screenWidth;
+
   if (pointIndex >= 0 && pointIndex < screenWidth * screenHeight) {
     if (closeness > zBuffer[pointIndex]) {
       zBuffer[pointIndex] = closeness;
@@ -97,7 +98,9 @@ void computeAndDrawPixel(float x, float y, float z, char ch) {
 int main() {
   // Clear terminal and escape
   printf("\x1b[2J");
+  int count = 0;
   while (1) {
+    count += 1;
     memset(output, ' ', screenWidth * screenHeight);
     memset(zBuffer, 0, screenWidth * screenHeight * 4);
     cubeWidth = 20;
@@ -105,11 +108,17 @@ int main() {
 
     for (float x = -cubeWidth; x < cubeWidth; x += INCREMENT_SPEED) {
       for (float y = -cubeWidth; y < cubeWidth; y += INCREMENT_SPEED) {
+        // Front
         computeAndDrawPixel(x, y, -cubeWidth, '@');
-        computeAndDrawPixel(cubeWidth, y, x, '$');
-        computeAndDrawPixel(-cubeWidth, y, -x, '~');
+        // Back Face
         computeAndDrawPixel(-x, y, cubeWidth, '#');
+        // Left Face
+        computeAndDrawPixel(-cubeWidth, y, -x, '~');
+        // Right Face
+        computeAndDrawPixel(cubeWidth, y, x, '$');
+        // Top Face
         computeAndDrawPixel(x, -cubeWidth, -y, ';');
+        // Bottom face
         computeAndDrawPixel(x, cubeWidth, y, '+');
       }
     }
