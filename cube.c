@@ -71,18 +71,31 @@ void computeAndDrawPixel(float x, float y, float z, char ch) {
   pointY3D = calculateRotatedYPoint(x, y, z);
   pointZ3D = calculateRotatedZPoint(x, y, z) + CAM_DISTANCE;
 
+  /**
+   * I'm calling "closeness" because it's easier for me to understand it,
+   * in reality is the depth of the pixel and bigger == closer.
+   */
   closeness = 1 / pointZ3D;
 
-  // Projecting to 2D space
+  /**
+   * Projecting 3D points onto 2d space
+   * See: https://en.wikipedia.org/wiki/3D_projection#Diagram
+   */
   pointX2D = (int)(screenWidth / 2 + horizontalOffSet +
                    pointX3D * closeness * CUBE_SCALE * 2);
   pointY2D = (int)(screenHeight / 2 + pointY3D * closeness * CUBE_SCALE);
 
-  // Adding the pixel to the buffer
-  // Needed to multiplicate by the width because
-  // i'm using a 1-D array (len = width * height) in the buffer
+  /**
+   * Needed to multiplicate by the width because
+   * i'm using a 1-D array (which len = width * height) as a buffer
+   */
   pointIndex = pointX2D + pointY2D * screenWidth;
 
+  /**
+   * When the "closeness" of a pixel is bigger, it will replace the one that
+   * already is there. This is what z-buffer is about.
+   * See: https://www.geeksforgeeks.org/z-buffer-depth-buffer-method/
+   */
   if (pointIndex >= 0 && pointIndex < screenWidth * screenHeight) {
     if (closeness > zBuffer[pointIndex]) {
       zBuffer[pointIndex] = closeness;
@@ -91,16 +104,10 @@ void computeAndDrawPixel(float x, float y, float z, char ch) {
   }
 }
 
-/**
- * See: https://en.wikipedia.org/wiki/3D_projection#Diagram
- */
-
 int main() {
   // Clear terminal and escape
   printf("\x1b[2J");
-  int count = 0;
   while (1) {
-    count += 1;
     memset(output, ' ', screenWidth * screenHeight);
     memset(zBuffer, 0, screenWidth * screenHeight * 4);
     cubeWidth = 20;
